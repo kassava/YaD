@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">YaD</string>
+
+    <string name="title_section1">Товары и услуги</string>
+    <string name="title_section2">Избраное</string>
+    <string name="title_section3">Настройки</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Поиск</string>
+
+    <string name="action_settings">Настройки</string>
+    <string name="title_activity_splash">YaD</string>
+
+    <string name="hello_world">Приветствую тебя!</string>
+    <string name="hello2">И снова мы вместе!</string>
+</resources>
