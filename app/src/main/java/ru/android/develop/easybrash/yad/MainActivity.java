@@ -1,33 +1,27 @@
 package ru.android.develop.easybrash.yad;
 
-import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+                    Model.Observer {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    private Model mModel;
+    private static final String TAG_WORKER = "TAG_WORKER";
+    private final String LOG_TAG = "MainActvity";
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -47,6 +41,25 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        // Work with retain fragment.
+        final WorkerFragment retainedWorkerFragment =
+                (WorkerFragment) getFragmentManager().findFragmentByTag(TAG_WORKER);
+
+        if (retainedWorkerFragment != null) {
+            mModel = retainedWorkerFragment.getModel();
+        } else {
+            final WorkerFragment workerFragment = new WorkerFragment();
+
+            getFragmentManager().beginTransaction()
+                    .add(workerFragment, TAG_WORKER)
+                    .commit();
+
+            mModel = workerFragment.getModel();
+        }
+        mModel.registerObserver(this);
+
+        mModel.signIn("user1", "qwerty");
     }
 
     @Override
@@ -54,9 +67,27 @@ public class MainActivity extends ActionBarActivity
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+
+        switch (position) {
+            case 0:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, PaymentsAndTransfersFragment.newInstance(position))
+                        .commit();
+                break;
+            case 1:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, FavoritesFragment.newInstance(position))
+                        .commit();
+                break;
+            case 2:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, SettingsFragment.newInstance(position))
+                        .commit();
+                break;
+            default:
+                break;
+        }
+
     }
 
     public void onSectionAttached(int number) {
@@ -109,59 +140,32 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    @Override
+    protected void onDestroy() {
+        Log.i(LOG_TAG, "onDestroy");
+        super.onDestroy();
+        mModel.unregisterObserver(this);
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            int position = getArguments().getInt(ARG_SECTION_NUMBER, 0);
-
-            Toast.makeToast(this, "position = " + position, Toast.LENGTH_SHORT).show();
-
-            View rootView = null;
-            switch (position) {
-                case 0:
-                    rootView = inflater.inflate(R.layout.payments_screen, container, false);
-                    break;
-                case 1:
-                    rootView = inflater.inflate(R.layout.favorites_screen, container, false);
-                    break;
-                default:
-                    break;
-            }
-
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+        if (isFinishing()) {
+            mModel.stopSignIn();
         }
     }
 
+    @Override
+    public void onSignInStarted(final Model signInModel) {
+        Log.i(LOG_TAG, "onSignInStarted");
+    }
+
+    @Override
+    public void onSignInSucceeded(final Model signInModel) {
+        Log.i(LOG_TAG, "onSignInSucceeded");
+//        finish();
+//        startActivity(new Intent(this, SuccessActivity.class));
+    }
+
+    @Override
+    public void onSignInFailed(final Model signInModel) {
+        Log.i(LOG_TAG, "onSignInFailed");
+        Toast.makeText(this, "Receiving error", Toast.LENGTH_SHORT).show();
+    }
 }
