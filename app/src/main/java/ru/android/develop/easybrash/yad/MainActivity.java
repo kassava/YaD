@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity
@@ -49,6 +51,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -99,9 +102,9 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -134,7 +137,22 @@ public class MainActivity extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            int position = getArguments().getInt(ARG_SECTION_NUMBER, 0);
+
+            Toast.makeToast(this, "position = " + position, Toast.LENGTH_SHORT).show();
+
+            View rootView = null;
+            switch (position) {
+                case 0:
+                    rootView = inflater.inflate(R.layout.payments_screen, container, false);
+                    break;
+                case 1:
+                    rootView = inflater.inflate(R.layout.favorites_screen, container, false);
+                    break;
+                default:
+                    break;
+            }
+
             return rootView;
         }
 

@@ -1,5 +1,6 @@
 package ru.android.develop.easybrash.yad;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -11,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
