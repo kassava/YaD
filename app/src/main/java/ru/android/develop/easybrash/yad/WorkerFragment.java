@@ -1,6 +1,7 @@
 package ru.android.develop.easybrash.yad;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 
 /**
@@ -9,8 +10,9 @@ import android.os.Bundle;
 public class WorkerFragment extends Fragment {
     private final Model mSignInModel;
 
+
     public WorkerFragment() {
-        mSignInModel = new Model();
+        mSignInModel = new Model(getActivity());
     }
 
     @Override
