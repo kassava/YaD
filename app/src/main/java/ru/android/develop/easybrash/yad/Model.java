@@ -19,11 +19,16 @@ public class Model {
     private GetDataTask mGetDataTask;
     private boolean mIsWorking;
     private Context mCtx;
+    private String dataStr;
 
     public Model(Context context) {
         Log.i(LOG_TAG, "new Instance");
 
         mCtx = context;
+    }
+
+    public String getDataStr() {
+        return dataStr;
     }
 
     public void signIn(final String userName, final String password) {
@@ -119,7 +124,7 @@ public class Model {
 
             if (success != null) {
                 Log.d(LOG_TAG, "str:" + success);
-
+                dataStr = success;
                 mObservable.notifySucceeded();
             } else {
                 Log.d(LOG_TAG, "str null");
