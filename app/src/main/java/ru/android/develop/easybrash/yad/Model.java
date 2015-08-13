@@ -5,8 +5,14 @@ import android.database.Observable;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
 import ru.android.develop.easybrash.yad.communicator.BackendCommunicator;
 import ru.android.develop.easybrash.yad.communicator.CommunicatorFactory;
+import ru.android.develop.easybrash.yad.network.VolleyApplication;
 
 /**
  * Created by tagnik'zur on 10.08.2015.
@@ -20,6 +26,7 @@ public class Model {
     private boolean mIsWorking;
     private Context mCtx;
     private String dataStr;
+    private String responseStr;
 
     public Model(Context context) {
         Log.i(LOG_TAG, "new Instance");
@@ -31,7 +38,7 @@ public class Model {
         return dataStr;
     }
 
-    public void signIn(final String userName, final String password) {
+    public void signIn() {
         Log.d(LOG_TAG, "sign in started");
 
         if (mIsWorking) {
@@ -44,8 +51,33 @@ public class Model {
 //        mSignInTask = new SignInTask(userName, password);
 //        mSignInTask.execute();
 
-        mGetDataTask = new GetDataTask();
-        mGetDataTask.execute(mCtx);
+//        mGetDataTask = new GetDataTask();
+//        mGetDataTask.execute(mCtx);
+
+        String url = "https://money.yandex.ru/api/categories-list";
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        Log.d(LOG_TAG, "response: " + response);
+                        dataStr = response;
+
+                        mIsWorking = false;
+                        mObservable.notifySucceeded(dataStr);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(LOG_TAG, "error: " + error.getMessage());
+
+                mIsWorking = false;
+                mObservable.notifyFailed();
+            }
+        }
+        );
+
+        VolleyApplication.getInstance().getRequestQueue().add(request);
     }
 
     public void stopSignIn() {
@@ -93,7 +125,7 @@ public class Model {
             mIsWorking = false;
 
             if (success) {
-                mObservable.notifySucceeded();
+                mObservable.notifySucceeded(success.toString());
             } else {
                 mObservable.notifyFailed();
             }
@@ -125,7 +157,7 @@ public class Model {
             if (success != null) {
                 Log.d(LOG_TAG, "str:" + success);
                 dataStr = success;
-                mObservable.notifySucceeded();
+                mObservable.notifySucceeded(dataStr);
             } else {
                 Log.d(LOG_TAG, "str null");
 
@@ -137,7 +169,7 @@ public class Model {
     public interface Observer {
         void onSignInStarted(Model model);
 
-        void onSignInSucceeded(Model model);
+        void onSignInSucceeded(String string);
 
         void onSignInFailed(Model model);
     }
@@ -149,9 +181,9 @@ public class Model {
             }
         }
 
-        public void notifySucceeded() {
+        public void notifySucceeded(String string) {
             for (final Observer observer : mObservers) {
-                observer.onSignInSucceeded(Model.this);
+                observer.onSignInSucceeded(string);
             }
         }
 

@@ -5,6 +5,12 @@ import android.app.Application;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.InputStream;
+
+import ru.android.develop.easybrash.yad.R;
+
 /**
  * Created by tagnik'zur on 11.08.2015.
  */
@@ -18,6 +24,9 @@ public class VolleyApplication extends Application {
         super.onCreate();
 
         mRequestQueue = Volley.newRequestQueue(this);
+//        mRequestQueue = Volley.newRequestQueue(this, new ExtHttpClientStack(new SslHttpClient(
+//                keyStore, "test123"
+//        )));
         sInstance = this;
     }
 

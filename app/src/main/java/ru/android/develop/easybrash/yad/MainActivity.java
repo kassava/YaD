@@ -59,7 +59,7 @@ public class MainActivity extends ActionBarActivity
         }
         mModel.registerObserver(this);
 
-        mModel.signIn("user1", "qwerty");
+        mModel.signIn();
     }
 
     @Override
@@ -67,6 +67,7 @@ public class MainActivity extends ActionBarActivity
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
+//        android.app.FragmentManager fragmentManager = getFragmentManager();
 
         switch (position) {
             case 0:
@@ -153,14 +154,14 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onSignInStarted(final Model signInModel) {
+
         Log.i(LOG_TAG, "onSignInStarted");
     }
 
     @Override
-    public void onSignInSucceeded(final Model signInModel) {
+    public void onSignInSucceeded(final String string) {
         Log.i(LOG_TAG, "onSignInSucceeded");
-//        finish();
-//        startActivity(new Intent(this, SuccessActivity.class));
+        Log.d(LOG_TAG, "str: " + string);
     }
 
     @Override
