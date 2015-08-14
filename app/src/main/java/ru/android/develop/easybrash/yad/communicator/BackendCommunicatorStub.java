@@ -30,7 +30,7 @@ class BackendCommunicatorStub implements BackendCommunicator {
     @Override
     public String postGetData(Context context) throws InterruptedException {
         Log.d(LOG_TAG, "postGetData");
-        String url = "https://money.yandex.ru/api/categories-list";
+        String url = "https://money.yandex.ru/api/categories-payments";
 
 //        JsonObjectRequest request = new JsonObjectRequest(url, null,
 //                new Response.Listener<JSONObject>() {
