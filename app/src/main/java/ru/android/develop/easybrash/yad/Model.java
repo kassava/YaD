@@ -67,13 +67,13 @@ public class Model {
                         mObservable.notifySucceeded(dataStr);
                     }
                 }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(LOG_TAG, "error: " + error.getMessage());
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                    Log.d(LOG_TAG, "error: " + error.getMessage());
 
-                mIsWorking = false;
-                mObservable.notifyFailed();
-            }
+                    mIsWorking = false;
+                    mObservable.notifyFailed();
+                }
         }
         );
 

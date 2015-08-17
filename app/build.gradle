@@ -25,4 +25,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:22.2.+'
     compile 'com.mcxiaoke.volley:library:1.0.+'
     compile 'com.wdullaer:swipeactionadapter:1.4.4'
+    compile 'de.greenrobot:greendao:2.0.0'
 }

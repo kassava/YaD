@@ -231,7 +231,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSignInStarted(final Model signInModel) {
-
         Log.i(LOG_TAG, "onSignInStarted");
     }
 
