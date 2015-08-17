@@ -22,6 +22,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.+'
     compile 'com.mcxiaoke.volley:library:1.0.+'
     compile 'com.wdullaer:swipeactionadapter:1.4.4'
 }

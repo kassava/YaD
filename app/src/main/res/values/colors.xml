@@ -4,4 +4,11 @@
     <color name="green">#009900</color>
     <color name="blue">#000099</color>
     <color name="orange">#FF9900</color>
+    
+    <color name="colorPrimary">#FFEA00</color>
+    <color name="colorPrimaryDark">#FFD600</color>
+    <color name="textColorPrimary">#000000</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="colorAccent">#FFFF8D</color>
 </resources>

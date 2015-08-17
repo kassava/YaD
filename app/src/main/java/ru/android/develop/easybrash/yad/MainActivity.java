@@ -1,27 +1,33 @@
 package ru.android.develop.easybrash.yad;
 
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
 import android.widget.Toast;
 
 
-public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-                    Model.Observer {
+public class MainActivity extends AppCompatActivity
+        implements Model.Observer, FragmentDrawer.FragmentDrawerListener {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
     private Model mModel;
     private static final String TAG_WORKER = "TAG_WORKER";
-    private final String LOG_TAG = "MainActvity";
+    private final String LOG_TAG = this.getClass().getSimpleName();
+
+    private Toolbar mToolbar;
+    private FragmentDrawer mDrawerFragment;
+    private DrawerLayout drawerLayout;
+
+    public static String jsonStr;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -31,16 +37,19 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+        setContentView(R.layout.main);
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mToolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+        mDrawerFragment = (FragmentDrawer)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
+        mDrawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
+        mDrawerFragment.setDrawerListener(this);
+
+        displayView(0);
 
         // Work with retain fragment.
         final WorkerFragment retainedWorkerFragment =
@@ -59,10 +68,76 @@ public class MainActivity extends ActionBarActivity
         }
         mModel.registerObserver(this);
 
-        mModel.signIn();
+//        mModel.signIn();
     }
 
     @Override
+    public void onDrawerItemSelected(View view, int position) {
+        displayView(position);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(LOG_TAG, "onBackPressed");
+
+        if(drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        } else {
+            super.onBackPressed();
+        }
+
+    }
+
+    private void displayView(int position) {
+        Fragment fragment = null;
+        String title = getString(R.string.app_name);
+        switch (position) {
+            case 0:
+                fragment = PaymentsFragment.newInstance(position);
+                title = getString(R.string.title_payments);
+                break;
+            case 1:
+                fragment = new FavoritesFragment();
+                title = getString(R.string.title_history);
+                break;
+            case 2:
+                fragment = new FavoritesFragment();
+                title = getString(R.string.title_favorites);
+                break;
+            case 3:
+                fragment = new SettingsFragment();
+                title = getString(R.string.title_settings);
+            default:
+                break;
+        }
+
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container_body, fragment);
+            fragmentTransaction.commit();
+
+            // set the toolbar title
+            getSupportActionBar().setTitle(title);
+        }
+    }
+
+    public void setActionBarTitle(String title) {
+        getSupportActionBar().setTitle(title);
+    }
+
+    public void hideDrawerIcon() {
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+//        getSupportActionBar().hide();
+
+    }
+
+    public void showDrawerIcon() {
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+//        getSupportActionBar().show();
+    }
+
+    // old
     public void onNavigationDrawerItemSelected(int position) {
 
         // update the main content by replacing fragments
@@ -72,7 +147,7 @@ public class MainActivity extends ActionBarActivity
         switch (position) {
             case 0:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, PaymentsAndTransfersFragment.newInstance(position))
+                        .replace(R.id.container, PaymentsFragment.newInstance(position))
                         .commit();
                 break;
             case 1:
@@ -112,18 +187,20 @@ public class MainActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return false;
-        }
-        return false; //super.onCreateOptionsMenu(menu);
+//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+//            // Only show items in the action bar relevant to this screen
+//            // if the drawer is not showing. Otherwise, let the drawer
+//            // decide what to show in the action bar.
+//            getMenuInflater().inflate(R.menu.main, menu);
+//            restoreActionBar();
+//            return false;
+//        }
+//        return false; //super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
@@ -134,9 +211,9 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
+        if (id == R.id.action_search) {
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -162,6 +239,7 @@ public class MainActivity extends ActionBarActivity
     public void onSignInSucceeded(final String string) {
         Log.i(LOG_TAG, "onSignInSucceeded");
         Log.d(LOG_TAG, "str: " + string);
+        jsonStr = string;
     }
 
     @Override

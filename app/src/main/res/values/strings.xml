@@ -9,10 +9,36 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_example">Поиск</string>
+    <string name="action_list_item">Назад</string>
 
     <string name="action_settings">Настройки</string>
     <string name="title_activity_splash">YaD</string>
 
     <string name="hello_world">Приветствую тебя!</string>
     <string name="hello2">И снова мы вместе!</string>
+
+
+    <string name="action_search">Поиск</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+
+    <string name="navigation_item_payments">Платежи и переводы</string>
+    <string name="navigation_item_favorites">Избраное</string>
+    <string name="navigation_item_history">История</string>
+    <string name="navigation_item_settings">Настройки</string>
+
+    <!-- navigation drawer iten labels-->
+    <string-array name="navigation_drawer_labels">
+        <item>@string/navigation_item_payments</item>
+        <item>@string/navigation_item_history</item>
+        <item>@string/navigation_item_favorites</item>
+        <item>@string/navigation_item_settings</item>
+    </string-array>
+
+    <string name="title_settings">Настройки</string>
+    <string name="title_favorites">Избраное</string>
+    <string name="title_history">История</string>
+    <string name="title_payments">Платежи и переводы</string>
+
+    <string name="search_hint">Наименование платежа или перевода</string>
 </resources>
