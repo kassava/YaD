@@ -53,14 +53,14 @@ public class MainActivity extends AppCompatActivity
 
         // Work with retain fragment.
         final WorkerFragment retainedWorkerFragment =
-                (WorkerFragment) getFragmentManager().findFragmentByTag(TAG_WORKER);
+                (WorkerFragment) getSupportFragmentManager().findFragmentByTag(TAG_WORKER);
 
         if (retainedWorkerFragment != null) {
             mModel = retainedWorkerFragment.getModel();
         } else {
             final WorkerFragment workerFragment = new WorkerFragment();
 
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(workerFragment, TAG_WORKER)
                     .commit();
 

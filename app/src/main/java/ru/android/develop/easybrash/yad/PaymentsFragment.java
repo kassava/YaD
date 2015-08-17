@@ -3,6 +3,7 @@ package ru.android.develop.easybrash.yad;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +33,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ru.android.develop.easybrash.yad.dao.Category;
+import ru.android.develop.easybrash.yad.dao.CategoryDao;
+import ru.android.develop.easybrash.yad.dao.DaoMaster;
+import ru.android.develop.easybrash.yad.dao.DaoSession;
+import ru.android.develop.easybrash.yad.dao.Item;
+import ru.android.develop.easybrash.yad.dao.ItemDao;
+
 /**
  * Created by ultra on 10.08.2015.
  */
@@ -53,6 +61,12 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
     SparseArray<Group> groups = new SparseArray<Group>();
     private Integer groupsIndex = 0;
 
+    private SQLiteDatabase db;
+    private DaoMaster daoMaster;
+    private DaoSession daoSession;
+    private CategoryDao categoryDao;
+    private ItemDao itemDao;
+
     /**
      * Return a new instance of this fragment for the given section number
      */
@@ -73,6 +87,8 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
                 container, false);
 
         mFragment = this;
+        Log.d(LOG_TAG, "1: " + this.toString());
+        Log.d(LOG_TAG, "2: " + mFragment.getActivity().toString());
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView
                 .findViewById(R.id.activity_main_swipe_refresh_layout);
 
@@ -80,30 +96,33 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
                         Log.d(LOG_TAG, "onRefresh");
+                        Log.d(LOG_TAG, "1: " + this.toString());
+                        Log.d(LOG_TAG, "2: " + mFragment.getActivity().toString());
+                // Work with retain fragment.
+                final WorkerFragment retainedWorkerFragment =
+                        (WorkerFragment) getFragmentManager().findFragmentByTag(TAG_WORKER);
 
-//                        String[] content = new String[20];
-//                        for (int i = 0; i < 20; i++) content[i] = "Row " + (i + 21);
-//                        ArrayAdapter<String> stringAdapter = new ArrayAdapter<String>(
-//                                getActivity(),
-//                                R.layout.row,
-//                                R.id.text,
-//                                new ArrayList<String>(Arrays.asList(content))
-//                        );
-//                        mAdapter = new SwipeActionAdapter(stringAdapter);
-//                        mAdapter.setSwipeActionListener(mFragment)
-//                                .setDimBackgrounds(true)
-//                                .setListView(getListView());
-//                        setListAdapter(mAdapter);
+                if (retainedWorkerFragment != null) {
+                    mModel = retainedWorkerFragment.getModel();
+                } else {
+                    final WorkerFragment workerFragment = new WorkerFragment();
+
+                    getFragmentManager().beginTransaction()
+                            .add(workerFragment, TAG_WORKER)
+                            .commit();
+
+                    mModel = workerFragment.getModel();
+                }
+                mModel.registerObserver(mFragment);
+                        mModel.signIn(mFragment.getActivity());
 //
-//                        mAdapter.addBackground(SwipeDirections.DIRECTION_NORMAL_LEFT,R.layout.row_bg_left)
-//                                .addBackground(SwipeDirections.DIRECTION_NORMAL_RIGHT, R.layout.row_bg_right);
                         mSwipeRefreshLayout.setRefreshing(false);
-                    }
-                }, 1500);
+//                    }
+//                }, 1500);
             }
         });
 //        createData();
@@ -116,62 +135,37 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
     }
 
     public void createData() {
-        JSONArray jsonArray = null;
-        try {
-            jsonArray = new JSONArray(SplashActivity.jsonStr);
+        Log.d(LOG_TAG, "createData");
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                getElements(jsonArray.getJSONObject(i));
+        DaoMaster.DevOpenHelper helper = new DaoMaster.
+                DevOpenHelper(getActivity(), "json-db", null);
+        db = helper.getWritableDatabase();
+
+        daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+        categoryDao = daoSession.getCategoryDao();
+        itemDao = daoSession.getItemDao();
+
+        List<Category> categoryList = categoryDao.queryBuilder().where(
+                CategoryDao.Properties.Id.isNotNull()).list();
+
+        for (int i = 0; i < categoryList.size(); i++) {
+//            Log.d(LOG_TAG, categoryList.get(i).getTitle());
+
+            GroupItem groupItem = new GroupItem();
+            groupItem.title = categoryList.get(i).getTitle();
+
+            List<Item> itemList = itemDao.queryBuilder().where(ItemDao.Properties.
+                    CategoryId.eq(categoryList.get(i).getId())).list();
+
+            for (int j = 0; j < itemList.size(); j++) {
+//                Log.d(LOG_TAG, itemList.get(j).getTitle());
+
+                ChildItem child = new ChildItem();
+                child.title = itemList.get(j).getTitle();
+                groupItem.items.add(child);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        groupsIndex = 0;
-    }
-
-    private void getElements(JSONObject jsonObj) {
-        Group group = null;
-        GroupItem item = new GroupItem();
-
-        JSONArray jsonArray = null;
-        try {
-            group = new Group(jsonObj.getString("title"));
-            item.title = jsonObj.getString("title");
-
-            if (haveSubs(jsonObj)) {
-                jsonArray = jsonObj.getJSONArray("subs");
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject obj = jsonArray.getJSONObject(i);
-                    if (!haveSubs(obj)) {
-                        group.children.add(obj.getString("title"));
-                        ChildItem child = new ChildItem();
-                        child.title = obj.getString("title");
-                        item.items.add(child);
-                    } else {
-                        getElements(obj);
-                    }
-                }
-            } else {
-                groups.append(groupsIndex, group);
-                groupsIndex++;
-                items.add(item);
-            }
-        } catch (JSONException e) {
-            Log.d(LOG_TAG, "JSONException");
-        }
-        groups.append(groupsIndex, group);
-        groupsIndex++;
-        items.add(item);
-    }
-
-    private boolean haveSubs(JSONObject jsonObj) {
-        try {
-            jsonObj.getJSONArray("subs");
-            return true;
-        } catch (JSONException e) {
-            return false;
+            items.add(groupItem);
         }
     }
 
@@ -198,11 +192,19 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
 //        mAdapter.addBackground(SwipeDirections.DIRECTION_NORMAL_LEFT,R.layout.row_bg_left)
 //                .addBackground(SwipeDirections.DIRECTION_NORMAL_RIGHT, R.layout.row_bg_right);
 
-        createData();
+
 //        ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-        MyExpandableListAdapter adapter = new MyExpandableListAdapter(getActivity(),
-                groups);
+//        MyExpandableListAdapter adapter = new MyExpandableListAdapter(getActivity(),
+//                groups);
 //        listView.setAdapter(adapter);
+
+        createData();
+        setDataInView();
+    }
+
+    private void setDataInView() {
+        Log.d(LOG_TAG, "setDataInView");
+
         mExampleAdapter = new ExampleAdapter(getActivity());
         mExampleAdapter.setData(items);
         listView.setAdapter(mExampleAdapter);
@@ -231,9 +233,25 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
 
         Log.d(LOG_TAG, "onAttach");
 
-        ((MainActivity) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
-        mModel = new Model(getActivity());
-        mModel.registerObserver(this);
+//        ((MainActivity) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
+
+        // Work with retain fragment.
+//        final WorkerFragment retainedWorkerFragment =
+//                (WorkerFragment) getFragmentManager().findFragmentByTag(TAG_WORKER);
+//
+//        if (retainedWorkerFragment != null) {
+//            mModel = retainedWorkerFragment.getModel();
+//        } else {
+//            final WorkerFragment workerFragment = new WorkerFragment();
+//
+//            getFragmentManager().beginTransaction()
+//                    .add(workerFragment, TAG_WORKER)
+//                    .commit();
+//
+//            mModel = workerFragment.getModel();
+//        }
+//        mModel.registerObserver(this);
+//        mModel.signIn(getActivity());
     }
 
     @Override
@@ -281,7 +299,7 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
             switch (direction) {
                 case SwipeDirections.DIRECTION_FAR_LEFT:
                     dir = "Far left";
-                    mModel.signIn();
+//                    mModel.signIn();
                     break;
                 case SwipeDirections.DIRECTION_NORMAL_LEFT:
                     dir = "Left";
@@ -313,6 +331,8 @@ public class PaymentsFragment extends ListFragment implements Model.Observer,
     public void onSignInSucceeded(final String string) {
         Log.i(LOG_TAG, "onSignInSucceeded");
         Log.d(LOG_TAG, "str: " + string);
+
+        setDataInView();
     }
 
     @Override
