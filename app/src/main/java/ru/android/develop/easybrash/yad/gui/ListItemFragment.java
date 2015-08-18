@@ -1,10 +1,8 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -23,6 +21,8 @@ import com.wdullaer.swipeactionadapter.SwipeDirections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import ru.android.develop.easybrash.yad.R;
 
 /**
  * Created by tagnik'zur on 15.08.2015.

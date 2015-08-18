@@ -12,4 +12,5 @@
     android:text="Test"
     android:textSize="20sp"
     android:textAlignment="textEnd"
-    android:foregroundGravity="center" />
+    android:foregroundGravity="center"
+    android:textColor="@android:color/black"/>

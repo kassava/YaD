@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 import java.util.ArrayList;
 import java.util.List;

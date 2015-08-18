@@ -1,4 +1,4 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.Toast;
+
+import ru.android.develop.easybrash.yad.Model;
+import ru.android.develop.easybrash.yad.R;
 
 
 public class MainActivity extends AppCompatActivity
@@ -52,21 +55,21 @@ public class MainActivity extends AppCompatActivity
         displayView(0);
 
         // Work with retain fragment.
-        final WorkerFragment retainedWorkerFragment =
-                (WorkerFragment) getSupportFragmentManager().findFragmentByTag(TAG_WORKER);
-
-        if (retainedWorkerFragment != null) {
-            mModel = retainedWorkerFragment.getModel();
-        } else {
-            final WorkerFragment workerFragment = new WorkerFragment();
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(workerFragment, TAG_WORKER)
-                    .commit();
-
-            mModel = workerFragment.getModel();
-        }
-        mModel.registerObserver(this);
+//        final WorkerFragment retainedWorkerFragment =
+//                (WorkerFragment) getSupportFragmentManager().findFragmentByTag(TAG_WORKER);
+//
+//        if (retainedWorkerFragment != null) {
+//            mModel = retainedWorkerFragment.getModel();
+//        } else {
+//            final WorkerFragment workerFragment = new WorkerFragment();
+//
+//            getSupportFragmentManager().beginTransaction()
+//                    .add(workerFragment, TAG_WORKER)
+//                    .commit();
+//
+//            mModel = workerFragment.getModel();
+//        }
+//        mModel.registerObserver(this);
 
 //        mModel.signIn();
     }
@@ -222,11 +225,11 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         Log.i(LOG_TAG, "onDestroy");
         super.onDestroy();
-        mModel.unregisterObserver(this);
-
-        if (isFinishing()) {
-            mModel.stopSignIn();
-        }
+//        mModel.unregisterObserver(this);
+//
+//        if (isFinishing()) {
+//            mModel.stopSignIn();
+//        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 /**
  * Created by tagnik'zur on 15.08.2015.

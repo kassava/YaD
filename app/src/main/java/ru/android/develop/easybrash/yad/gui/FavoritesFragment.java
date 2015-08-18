@@ -1,10 +1,12 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import ru.android.develop.easybrash.yad.R;
 
 /**
  * Created by ultra on 10.08.2015.

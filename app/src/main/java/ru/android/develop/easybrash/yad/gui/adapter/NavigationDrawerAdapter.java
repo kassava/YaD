@@ -1,4 +1,4 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.List;
+
+import ru.android.develop.easybrash.yad.gui.NavDrawerItem;
+import ru.android.develop.easybrash.yad.R;
 
 /**
  * Created by tagnik'zur on 15.08.2015.

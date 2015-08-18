@@ -1,26 +1,16 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import ru.android.develop.easybrash.yad.dao.Category;
-import ru.android.develop.easybrash.yad.dao.CategoryDao;
-import ru.android.develop.easybrash.yad.dao.DaoMaster;
-import ru.android.develop.easybrash.yad.dao.DaoSession;
-import ru.android.develop.easybrash.yad.dao.Item;
-import ru.android.develop.easybrash.yad.dao.ItemDao;
+import ru.android.develop.easybrash.yad.Model;
+import ru.android.develop.easybrash.yad.R;
+import ru.android.develop.easybrash.yad.WorkerFragment;
 
 public class SplashActivity extends AppCompatActivity implements Model.Observer {
     private final String LOG_TAG = this.getClass().getSimpleName();

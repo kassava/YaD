@@ -24,9 +24,6 @@ public class VolleyApplication extends Application {
         super.onCreate();
 
         mRequestQueue = Volley.newRequestQueue(this);
-//        mRequestQueue = Volley.newRequestQueue(this, new ExtHttpClientStack(new SslHttpClient(
-//                keyStore, "test123"
-//        )));
         sInstance = this;
     }
 

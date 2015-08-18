@@ -1,4 +1,4 @@
-package ru.android.develop.easybrash.yad;
+package ru.android.develop.easybrash.yad.gui;
 
 /**
  * Created by tagnik'zur on 15.08.2015.
@@ -20,6 +20,9 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.android.develop.easybrash.yad.R;
+import ru.android.develop.easybrash.yad.gui.adapter.NavigationDrawerAdapter;
 
 public class FragmentDrawer extends Fragment {
 

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ru.android.develop.easybrash.yad.AnimatedExpandableListView
+        <ru.android.develop.easybrash.yad.gui.AnimatedExpandableListView
             android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

@@ -3,7 +3,6 @@ package ru.android.develop.easybrash.yad;
 import android.content.Context;
 import android.database.Observable;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -15,8 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ru.android.develop.easybrash.yad.communicator.BackendCommunicator;
-import ru.android.develop.easybrash.yad.communicator.CommunicatorFactory;
 import ru.android.develop.easybrash.yad.dao.Category;
 import ru.android.develop.easybrash.yad.dao.CategoryDao;
 import ru.android.develop.easybrash.yad.dao.DaoMaster;
@@ -32,8 +29,6 @@ public class Model {
     private static final String LOG_TAG = "Model";
 
     private final SignInObservable mObservable = new SignInObservable();
-    private SignInTask mSignInTask;
-    private GetDataTask mGetDataTask;
     private boolean mIsWorking;
     private Context mCtx;
     private String dataStr;
@@ -60,7 +55,7 @@ public class Model {
     }
 
     public void signIn(final Context context) {
-        Log.d(LOG_TAG, "sign in started");
+        Log.d(LOG_TAG, "sign in started: " + context);
 
         if (mIsWorking) {
             return;
@@ -80,7 +75,7 @@ public class Model {
                         dataStr = response;
 
                         DaoMaster.DevOpenHelper helper = new DaoMaster.
-                                DevOpenHelper(context, "json-db", null);
+                                DevOpenHelper(VolleyApplication.getInstance(), "json-db", null);
                         db = helper.getWritableDatabase();
 
                         // Add data to db
@@ -97,7 +92,6 @@ public class Model {
 
                         try {
                             JSONArray jsonArray = new JSONArray(dataStr);
-                            Log.d(LOG_TAG, "Length: " + jsonArray.length());
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 getElements(jsonArray.getJSONObject(i));
@@ -129,12 +123,8 @@ public class Model {
     }
 
     private void getElements(JSONObject jsonObj) {
-//        StringBuilder strBuilder = new StringBuilder();
         JSONArray jsonArray = null;
         try {
-//            strBuilder.append(jsonObj.getString("title"));
-//            strBuilder.append(" = ");
-
             Category entity = new Category();
             if (jsonObj.getString("title").equals("Игры и общение")) {
                 entity.setTitle("Общение");
@@ -150,9 +140,6 @@ public class Model {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject obj = jsonArray.getJSONObject(i);
                     if (!haveSubs(obj)) {
-//                        strBuilder.append(obj.get("title"));
-//                        strBuilder.append(" - ");
-
                         Item itemEntity = new Item();
                         itemEntity.setTitle(obj.getString("title"));
                         itemEntity.setIdentificator(obj.getString("id"));
@@ -163,12 +150,10 @@ public class Model {
                     }
                 }
             } else {
-//                groups.add(strBuilder.toString());
             }
         } catch (JSONException e) {
             Log.d(LOG_TAG, "JSONException");
         }
-//        groups.add(strBuilder.toString());
     }
 
     private boolean haveSubs(JSONObject jsonObj) {
@@ -176,15 +161,12 @@ public class Model {
             jsonObj.getJSONArray("subs");
             return true;
         } catch (JSONException e) {
-//			e.printStackTrace();
             return false;
         }
     }
 
     public void stopSignIn() {
         if (mIsWorking) {
-//            mSignInTask.cancel(true);
-//            mGetDataTask.cancel(true);
             mIsWorking = false;
         }
     }
@@ -198,73 +180,6 @@ public class Model {
 
     public void unregisterObserver(final Observer observer) {
         mObservable.unregisterObserver(observer);
-    }
-
-    private class SignInTask extends AsyncTask<Void, Void, Boolean> {
-        private String mUserName;
-        private String mPassword;
-
-        public SignInTask(final String userName, final String password) {
-            mUserName = userName;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(final Void... params) {
-            final BackendCommunicator communicator = CommunicatorFactory.createBackendCommunicator();
-
-            try {
-                return communicator.postSignIn(mUserName, mPassword);
-            } catch (InterruptedException e) {
-                Log.i(LOG_TAG, "Sign in interrupted");
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mIsWorking = false;
-
-            if (success) {
-                mObservable.notifySucceeded(success.toString());
-            } else {
-                mObservable.notifyFailed();
-            }
-        }
-    }
-
-    private class GetDataTask extends AsyncTask<Context, Void, String> {
-        public GetDataTask() {
-            Log.d(LOG_TAG, "GetDataTask");
-        }
-
-        @Override
-        protected String doInBackground(final Context... params) {
-            final BackendCommunicator communicator = CommunicatorFactory.createBackendCommunicator();
-
-            try {
-                Log.d(LOG_TAG, "getDataTask doInBackground");
-                return communicator.postGetData(params[0]);
-            } catch (InterruptedException e) {
-                Log.i(LOG_TAG, "Sign in interrupted");
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(final String success) {
-            mIsWorking = false;
-
-            if (success != null) {
-                Log.d(LOG_TAG, "str:" + success);
-                dataStr = success;
-                mObservable.notifySucceeded(dataStr);
-            } else {
-                Log.d(LOG_TAG, "str null");
-
-                mObservable.notifyFailed();
-            }
-        }
     }
 
     public interface Observer {
