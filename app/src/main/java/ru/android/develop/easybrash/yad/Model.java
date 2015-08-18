@@ -1,14 +1,12 @@
 package ru.android.develop.easybrash.yad;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Observable;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +28,8 @@ public class Model {
 
     private final SignInObservable mObservable = new SignInObservable();
     private boolean mIsWorking;
+    private GetAndSaveDataReceiver receiver;
+
     private Context mCtx;
     private String dataStr;
     private String responseStr;
@@ -61,65 +61,74 @@ public class Model {
             return;
         }
 
+        IntentFilter filter = new IntentFilter(GetAndSaveDataService.DATASERVICE_ACTION);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new GetAndSaveDataReceiver();
+        VolleyApplication.getInstance().registerReceiver(receiver, filter);
+
         mObservable.notifyStarted();
 
         mIsWorking = true;
 
-        String url = "https://money.yandex.ru/api/categories-list";
-        StringRequest request = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        Log.d(LOG_TAG, "response: " + response);
-                        dataStr = response;
+//        String url = "https://money.yandex.ru/api/categories-list";
+//        StringRequest request = new StringRequest(Request.Method.GET, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        // Display the first 500 characters of the response string.
+//                        Log.d(LOG_TAG, "response: " + response);
+//                        dataStr = response;
+//
+//                        DaoMaster.DevOpenHelper helper = new DaoMaster.
+//                                DevOpenHelper(VolleyApplication.getInstance(), "json-db", null);
+//                        db = helper.getWritableDatabase();
+//
+//                        // Add data to db
+//                        try {
+//                            DaoMaster.dropAllTables(db, true);
+//                            DaoMaster.createAllTables(db, false);
+//                        } catch(RuntimeException e) {
+//                            e.printStackTrace();
+//                        }
+//                        daoMaster = new DaoMaster(db);
+//                        daoSession = daoMaster.newSession();
+//                        categoryDao = daoSession.getCategoryDao();
+//                        itemDao = daoSession.getItemDao();
+//
+//                        try {
+//                            JSONArray jsonArray = new JSONArray(dataStr);
+//
+//                            for (int i = 0; i < jsonArray.length(); i++) {
+//                                getElements(jsonArray.getJSONObject(i));
+//                            }
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        db.close();
+//                        helper.close();
+//
+//                        mIsWorking = false;
+//                        mObservable.notifySucceeded(dataStr);
+//
+//                        Log.d(LOG_TAG, "onResponse.success");
+//                    }
+//                }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                    Log.d(LOG_TAG, "error: " + error.getMessage());
+//
+//                    mIsWorking = false;
+//                    mObservable.notifyFailed();
+//                }
+//        }
+//        );
+//
+//        VolleyApplication.getInstance().getRequestQueue().add(request);
 
-                        DaoMaster.DevOpenHelper helper = new DaoMaster.
-                                DevOpenHelper(VolleyApplication.getInstance(), "json-db", null);
-                        db = helper.getWritableDatabase();
-
-                        // Add data to db
-                        try {
-                            DaoMaster.dropAllTables(db, true);
-                            DaoMaster.createAllTables(db, false);
-                        } catch(RuntimeException e) {
-                            e.printStackTrace();
-                        }
-                        daoMaster = new DaoMaster(db);
-                        daoSession = daoMaster.newSession();
-                        categoryDao = daoSession.getCategoryDao();
-                        itemDao = daoSession.getItemDao();
-
-                        try {
-                            JSONArray jsonArray = new JSONArray(dataStr);
-
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                getElements(jsonArray.getJSONObject(i));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        db.close();
-                        helper.close();
-
-                        mIsWorking = false;
-                        mObservable.notifySucceeded(dataStr);
-
-                        Log.d(LOG_TAG, "onResponse.success");
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    Log.d(LOG_TAG, "error: " + error.getMessage());
-
-                    mIsWorking = false;
-                    mObservable.notifyFailed();
-                }
-        }
-        );
-
-        VolleyApplication.getInstance().getRequestQueue().add(request);
+        Intent msgIntent = new Intent(VolleyApplication.getInstance(),
+                GetAndSaveDataService.class);
+        VolleyApplication.getInstance().startService(msgIntent);
     }
 
     private void getElements(JSONObject jsonObj) {
@@ -168,6 +177,7 @@ public class Model {
     public void stopSignIn() {
         if (mIsWorking) {
             mIsWorking = false;
+            VolleyApplication.getInstance().unregisterReceiver(receiver);
         }
     }
 
@@ -206,6 +216,21 @@ public class Model {
         public void notifyFailed() {
             for (final Observer observer : mObservers) {
                 observer.onSignInFailed(Model.this);
+            }
+        }
+    }
+
+    public class GetAndSaveDataReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String response = intent.getStringExtra(GetAndSaveDataService.RESPONSE_STRING);
+
+            if (response.equals(GetAndSaveDataService.SUCCESS_STRING)) {
+                mIsWorking = false;
+                mObservable.notifySucceeded(dataStr);
+            } else {
+                mIsWorking = false;
+                mObservable.notifyFailed();
             }
         }
     }

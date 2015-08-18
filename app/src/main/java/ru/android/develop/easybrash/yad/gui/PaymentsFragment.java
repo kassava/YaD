@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -18,12 +17,10 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import ru.android.develop.easybrash.yad.DataService;
+import ru.android.develop.easybrash.yad.GetFromDBDataService;
 import ru.android.develop.easybrash.yad.Model;
 import ru.android.develop.easybrash.yad.R;
 import ru.android.develop.easybrash.yad.WorkerFragment;
@@ -48,15 +45,10 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
 
     private Model mModel;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ExampleAdapter mExampleAdapter;
     private PaymentsFragment mFragment;
     private AnimatedExpandableListView listView;
     private List<GroupItem> items = new ArrayList<GroupItem>();
-
-    private SQLiteDatabase db;
-    private DaoMaster daoMaster;
-    private DaoSession daoSession;
-    private CategoryDao categoryDao;
-    private ItemDao itemDao;
 
     private DataReceiver receiver;
 
@@ -120,53 +112,19 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
         return rootView;
     }
 
-    public void getDataFromDB() {
-        Log.d(LOG_TAG, "getDataFromDB");
-
-        DaoMaster.DevOpenHelper helper = new DaoMaster.
-                DevOpenHelper(VolleyApplication.getInstance(), "json-db", null);
-        db = helper.getWritableDatabase();
-
-        daoMaster = new DaoMaster(db);
-        daoSession = daoMaster.newSession();
-        categoryDao = daoSession.getCategoryDao();
-        itemDao = daoSession.getItemDao();
-
-        List<Category> categoryList = categoryDao.queryBuilder().where(
-                CategoryDao.Properties.Id.isNotNull()).list();
-
-        for (int i = 0; i < categoryList.size(); i++) {
-//            Log.d(LOG_TAG, categoryList.get(i).getTitle());
-
-            GroupItem groupItem = new GroupItem();
-            groupItem.title = categoryList.get(i).getTitle();
-
-            List<Item> itemList = itemDao.queryBuilder().where(ItemDao.Properties.
-                    CategoryId.eq(categoryList.get(i).getId())).list();
-
-            for (int j = 0; j < itemList.size(); j++) {
-//                Log.d(LOG_TAG, itemList.get(j).getTitle());
-
-                ChildItem child = new ChildItem();
-                child.title = itemList.get(j).getTitle();
-                groupItem.items.add(child);
-            }
-            items.add(groupItem);
-        }
-
-        helper.close();
-        db.close();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
         Log.d(LOG_TAG, "onResume");
 
-        IntentFilter filter = new IntentFilter(DataService.DATASERVICE_ACTION);
+        IntentFilter filter = new IntentFilter(GetFromDBDataService.DATASERVICE_ACTION);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new DataReceiver();
         VolleyApplication.getInstance().registerReceiver(receiver, filter);
+
+        Intent msgIntent = new Intent(VolleyApplication.getInstance(),
+                GetFromDBDataService.class);
+        VolleyApplication.getInstance().startService(msgIntent);
     }
 
     @Override
@@ -181,14 +139,12 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
 
         Log.d(LOG_TAG, "onActivityCreated");
 
-        getDataFromDB();
-        setDataInView();
+        mExampleAdapter = new ExampleAdapter(VolleyApplication.getInstance());
     }
 
     private void setDataInView() {
         Log.d(LOG_TAG, "setDataInView");
 
-        ExampleAdapter mExampleAdapter = new ExampleAdapter(VolleyApplication.getInstance());
         mExampleAdapter.setData(items);
         listView.setAdapter(mExampleAdapter);
 
@@ -237,11 +193,8 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
         mModel.unregisterObserver(this);
 
         Intent msgIntent = new Intent(VolleyApplication.getInstance(),
-                DataService.class);
+                GetFromDBDataService.class);
         VolleyApplication.getInstance().startService(msgIntent);
-
-//        getDataFromDB();
-//        setDataInView();
     }
 
     @Override
@@ -249,29 +202,21 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
         Log.i(LOG_TAG, "onSignInFailed");
         Log.d(LOG_TAG, "str: " + signInModel.getDataStr());
         mModel.unregisterObserver(this);
+
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     public class DataReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            intent.getParcelableArrayExtra(DataService.EXTRA_KEY_OUT);
+//            intent.getParcelableArrayExtra(GetFromDBDataService.EXTRA_KEY_OUT);
 
             mSwipeRefreshLayout.setRefreshing(false);
-//            Parcelable[] array = intent.getParcelableArrayExtra(DataService.EXTRA_KEY_OUT);
+            items.clear();
+            items = intent.getParcelableArrayListExtra(GetFromDBDataService.EXTRA_KEY_OUT);
+            Log.d(LOG_TAG, "DataReceiver");
+            Log.d(LOG_TAG, "!!: " + items.size());
 
-//            Log.d(LOG_TAG, array[0].toString());
-
-            List<GroupItem> sendItems = new ArrayList<GroupItem>();
-
-            GroupItem groupItem = new GroupItem();
-            groupItem.title = "payments";
-            ChildItem childItem = new ChildItem();
-            childItem.title = "pay1";
-            groupItem.items.add(childItem);
-            childItem = new ChildItem();
-            groupItem.items.add(childItem);
-//            sendItems.add(groupItem);
-            items.add(groupItem);
             setDataInView();
         }
     }
