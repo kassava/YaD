@@ -122,8 +122,6 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
         super.onResume();
         Log.d(LOG_TAG, "onResume");
 
-
-
         IntentFilter filter = new IntentFilter(GetFromDBDataService.DATASERVICE_ACTION);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new DataReceiver();

@@ -41,7 +41,7 @@ public class GetFromDBDataService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(LOG_TAG, "onHandleIntent");
-
+        sendItems.clear();
         getDataFromDB();
 
         // return result
