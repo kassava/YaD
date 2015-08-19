@@ -26,7 +26,7 @@ public class SplashActivity extends AppCompatActivity implements Model.Observer 
         super.onCreate(savedInstanceState);
 
         Log.d(LOG_TAG, "onCreate: ");
-        setContentView(R.layout.splash_actvity);
+        setContentView(R.layout.activity_splash);
         textView = (TextView)findViewById(R.id.textView);
 
         prefs = getSharedPreferences(prefName, MODE_PRIVATE);

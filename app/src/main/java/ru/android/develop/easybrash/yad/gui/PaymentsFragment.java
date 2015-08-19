@@ -1,21 +1,16 @@
 package ru.android.develop.easybrash.yad.gui;
 
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
@@ -28,13 +23,6 @@ import ru.android.develop.easybrash.yad.GetFromDBDataService;
 import ru.android.develop.easybrash.yad.Model;
 import ru.android.develop.easybrash.yad.R;
 import ru.android.develop.easybrash.yad.WorkerFragment;
-import ru.android.develop.easybrash.yad.dao.Category;
-import ru.android.develop.easybrash.yad.dao.CategoryDao;
-import ru.android.develop.easybrash.yad.dao.DaoMaster;
-import ru.android.develop.easybrash.yad.dao.DaoSession;
-import ru.android.develop.easybrash.yad.dao.Item;
-import ru.android.develop.easybrash.yad.dao.ItemDao;
-import ru.android.develop.easybrash.yad.group.ChildItem;
 import ru.android.develop.easybrash.yad.group.GroupItem;
 import ru.android.develop.easybrash.yad.gui.adapter.ExampleAdapter;
 import ru.android.develop.easybrash.yad.network.VolleyApplication;
@@ -73,7 +61,7 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.payments_v2,
+        View rootView = inflater.inflate(R.layout.fragments_payments,
                 container, false);
 
         mFragment = this;

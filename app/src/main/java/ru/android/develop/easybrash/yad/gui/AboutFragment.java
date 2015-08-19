@@ -12,13 +12,13 @@ import ru.android.develop.easybrash.yad.R;
 /**
  * Created by tagnik'zur on 10.08.2015.
  */
-public class SettingsFragment extends Fragment {
+public class AboutFragment extends Fragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
     /**
      * Return a new instance of this fragment for the given section number
      */
-    public static SettingsFragment newInstance(int sectionNumber) {
-        SettingsFragment fragment = new SettingsFragment();
+    public static AboutFragment newInstance(int sectionNumber) {
+        AboutFragment fragment = new AboutFragment();
 
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -31,7 +31,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.settings_screen,
+        View rootView = inflater.inflate(R.layout.activity_about,
                 container, false);
 
         return rootView;

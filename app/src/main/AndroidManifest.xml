@@ -14,7 +14,7 @@
             android:name=".gui.MainActivity"
             android:label="@string/app_name" >
         </activity>
-        <activity android:name=".gui.SearchActvity"/>
+
         <service android:name=".GetFromDBDataService"/>
         <service android:name=".GetAndSaveDataService"/>
         <activity

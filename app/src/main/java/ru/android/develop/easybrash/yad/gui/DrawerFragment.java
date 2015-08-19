@@ -24,9 +24,9 @@ import java.util.List;
 import ru.android.develop.easybrash.yad.R;
 import ru.android.develop.easybrash.yad.gui.adapter.NavigationDrawerAdapter;
 
-public class FragmentDrawer extends Fragment {
+public class DrawerFragment extends Fragment {
 
-    private static String TAG = FragmentDrawer.class.getSimpleName();
+    private static String TAG = DrawerFragment.class.getSimpleName();
 
     private RecyclerView recyclerView;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -36,7 +36,7 @@ public class FragmentDrawer extends Fragment {
     private static String[] titles = null;
     private FragmentDrawerListener drawerListener;
 
-    public FragmentDrawer() {
+    public DrawerFragment() {
 
     }
 
