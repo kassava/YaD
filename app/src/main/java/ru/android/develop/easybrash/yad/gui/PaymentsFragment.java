@@ -55,6 +55,7 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
     private List<GroupItem> items = new ArrayList<GroupItem>();
 
     private DataReceiver receiver;
+    private FilterRequestReceiver filterReceiver;
 
     /**
      * Return a new instance of this fragment for the given section number
@@ -121,10 +122,17 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
         super.onResume();
         Log.d(LOG_TAG, "onResume");
 
+
+
         IntentFilter filter = new IntentFilter(GetFromDBDataService.DATASERVICE_ACTION);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new DataReceiver();
         VolleyApplication.getInstance().registerReceiver(receiver, filter);
+
+        filter = new IntentFilter(MainActivity.FILTER_ACTION);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        filterReceiver = new FilterRequestReceiver();
+        VolleyApplication.getInstance().registerReceiver(filterReceiver, filter);
 
         Intent msgIntent = new Intent(VolleyApplication.getInstance(),
                 GetFromDBDataService.class);
@@ -135,6 +143,7 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
     public void onPause() {
         super.onPause();
         VolleyApplication.getInstance().unregisterReceiver(receiver);
+        VolleyApplication.getInstance().unregisterReceiver(filterReceiver);
     }
 
     @Override
@@ -235,6 +244,35 @@ public class PaymentsFragment extends ListFragment implements Model.Observer {
             Log.d(LOG_TAG, "!!: " + items.size());
 
             setDataInView();
+        }
+    }
+
+    private void expandAll() {
+        int count = mExampleAdapter.getGroupCount();
+        for (int i = 0; i < count; i++) {
+            listView.expandGroup(i);
+        }
+    }
+
+    private void collapseAll() {
+        int count = mExampleAdapter.getGroupCount();
+        for (int i = 0; i < count; i++) {
+            listView.collapseGroup(i);
+        }
+    }
+
+    public class FilterRequestReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String filter = intent.getStringExtra(MainActivity.FILTER_STRING);
+            Log.d(LOG_TAG, "filter:" + filter);
+
+            mExampleAdapter.filterData(filter);
+            if (!filter.equals("")) {
+                expandAll();
+            } else {
+                collapseAll();
+            }
         }
     }
 }

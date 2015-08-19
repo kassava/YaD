@@ -1,34 +1,46 @@
 package ru.android.develop.easybrash.yad.gui;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
 import android.widget.Toast;
 
+import ru.android.develop.easybrash.yad.GetFromDBDataService;
 import ru.android.develop.easybrash.yad.Model;
 import ru.android.develop.easybrash.yad.R;
+import ru.android.develop.easybrash.yad.network.VolleyApplication;
 
 
 public class MainActivity extends AppCompatActivity
-        implements Model.Observer, FragmentDrawer.FragmentDrawerListener {
+        implements Model.Observer, FragmentDrawer.FragmentDrawerListener,
+        SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private Model mModel;
     private static final String TAG_WORKER = "TAG_WORKER";
     private final String LOG_TAG = this.getClass().getSimpleName();
 
+    public static final String FILTER_STRING = "filter_string";
+    public static final String FILTER_ACTION = "filter_action";
+
     private Toolbar mToolbar;
     private FragmentDrawer mDrawerFragment;
     private DrawerLayout drawerLayout;
+    private SearchView mSearchView;
 
     public static String jsonStr;
 
@@ -43,6 +55,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.main);
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+
         mToolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -51,6 +64,8 @@ public class MainActivity extends AppCompatActivity
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
         mDrawerFragment.setUp(R.id.fragment_navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), mToolbar);
         mDrawerFragment.setDrawerListener(this);
+
+
 
         displayView(0);
 
@@ -192,17 +207,21 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-//            // Only show items in the action bar relevant to this screen
-//            // if the drawer is not showing. Otherwise, let the drawer
-//            // decide what to show in the action bar.
-//            getMenuInflater().inflate(R.menu.main, menu);
-//            restoreActionBar();
-//            return false;
-//        }
-//        return false; //super.onCreateOptionsMenu(menu);
-
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+//        MenuItem searchItem = menu.findItem(R.id.action_search);
+
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        // Assumes current activity is the searchable activity
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+
+        mSearchView.setOnQueryTextListener(this);
+        mSearchView.setOnCloseListener(this);
+
         return true;
     }
 
@@ -215,6 +234,9 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
+//            Intent intent = new Intent(MainActivity.this, SearchActvity.class);
+//            startActivity(intent);
+//            setContentView(R.layout.search_activity);
             return true;
         }
 
@@ -248,5 +270,37 @@ public class MainActivity extends AppCompatActivity
     public void onSignInFailed(final Model signInModel) {
         Log.i(LOG_TAG, "onSignInFailed");
         Toast.makeText(this, "Receiving error", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onClose() {
+        Log.d(LOG_TAG, "onClose");
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(LOG_TAG, "onQueryTextSubmit: " + query);
+
+        Intent intentResponse = new Intent();
+        intentResponse.setAction(FILTER_ACTION);
+        intentResponse.addCategory(Intent.CATEGORY_DEFAULT);
+        intentResponse.putExtra(FILTER_STRING, query);
+        sendBroadcast(intentResponse);
+
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.d(LOG_TAG, "onQueryTextChange");
+
+        Intent intentResponse = new Intent();
+        intentResponse.setAction(FILTER_ACTION);
+        intentResponse.addCategory(Intent.CATEGORY_DEFAULT);
+        intentResponse.putExtra(FILTER_STRING, newText);
+        sendBroadcast(intentResponse);
+
+        return false;
     }
 }

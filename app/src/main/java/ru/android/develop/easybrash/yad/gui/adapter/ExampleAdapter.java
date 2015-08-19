@@ -1,11 +1,13 @@
 package ru.android.develop.easybrash.yad.gui.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.android.develop.easybrash.yad.group.ChildHolder;
@@ -23,6 +25,7 @@ public class ExampleAdapter extends AnimatedExpandableListView.AnimatedExpandabl
     private LayoutInflater inflater;
 
     private List<GroupItem> items;
+    private List<GroupItem> filterItems;
 
     public ExampleAdapter(Context context) {
         inflater = LayoutInflater.from(context);
@@ -30,6 +33,8 @@ public class ExampleAdapter extends AnimatedExpandableListView.AnimatedExpandabl
 
     public void setData(List<GroupItem> items) {
         this.items = items;
+        this.filterItems = new ArrayList<GroupItem>();
+        this.filterItems.addAll(this.items);
     }
 
     @Override
@@ -107,5 +112,37 @@ public class ExampleAdapter extends AnimatedExpandableListView.AnimatedExpandabl
     @Override
     public boolean isChildSelectable(int arg0, int arg1) {
         return true;
+    }
+
+
+    // filter data
+    public void filterData(String query) {
+        Log.d("filter", "filter: " + query);
+
+        query.toLowerCase();
+        items.clear();
+
+            if (query.isEmpty()) {
+                items.addAll(filterItems);
+            } else {
+                for (GroupItem groupItem : filterItems) {
+                    List<ChildItem> childItems = groupItem.items;
+
+                    List<ChildItem> newList = new ArrayList<ChildItem>();
+                    for (ChildItem childItem : childItems) {
+                        if (childItem.title.toLowerCase().contains(query)) {
+                            newList.add(childItem);
+                        }
+                    }
+                    if (newList.size() > 0) {
+                        GroupItem newGroupItem = new GroupItem();
+                        newGroupItem.title = groupItem.title;
+                        newGroupItem.items.addAll(newList);
+                        items.add(newGroupItem);
+                    }
+                }
+            }
+        Log.d("filter", "filter items: " + items.size());
+        notifyDataSetChanged();
     }
 }
